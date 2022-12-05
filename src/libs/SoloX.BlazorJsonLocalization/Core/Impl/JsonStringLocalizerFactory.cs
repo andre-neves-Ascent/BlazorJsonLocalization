@@ -46,6 +46,7 @@ namespace SoloX.BlazorJsonLocalization.Core.Impl
         private readonly ICultureInfoService cultureInfoService;
         private readonly ICacheService cacheService;
         private readonly ILogger<JsonStringLocalizerFactory> logger;
+        private readonly ILogger<StringLocalizerProxy> stringLocalizerProxyLogger;
 
         /// <summary>
         /// Setup the factory.
@@ -61,7 +62,8 @@ namespace SoloX.BlazorJsonLocalization.Core.Impl
             ICultureInfoService cultureInfoService,
             IExtensionResolverService extensionResolverService,
             ICacheService cacheService,
-            ILogger<JsonStringLocalizerFactory> logger)
+            ILogger<JsonStringLocalizerFactory> logger,
+            ILogger<StringLocalizerProxy> stringLocalizerProxyLogger)
         {
             if (options == null)
             {
@@ -69,6 +71,7 @@ namespace SoloX.BlazorJsonLocalization.Core.Impl
             }
 
             this.logger = logger;
+            this.stringLocalizerProxyLogger = stringLocalizerProxyLogger;
             this.options = options.Value;
             this.extensionResolverService = extensionResolverService;
             this.cultureInfoService = cultureInfoService;
@@ -114,7 +117,7 @@ namespace SoloX.BlazorJsonLocalization.Core.Impl
 
             this.logger.LogDebug($"Create String localizer proxy for {baseName} in {assembly} and register in cache");
 
-            localizer = new StringLocalizerProxy(this.cultureInfoService, new FactoryInternal(ci => this.CreateStringLocalizer(baseName, assembly, ci)));
+            localizer = new StringLocalizerProxy(this.stringLocalizerProxyLogger, this.cultureInfoService, new FactoryInternal(ci => this.CreateStringLocalizer(baseName, assembly, ci)));
             this.cacheService.Cache(assembly, baseName, null, localizer);
 
             return localizer;
